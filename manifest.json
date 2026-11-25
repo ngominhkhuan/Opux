@@ -1,0 +1,359 @@
+{
+  "id": "opux",
+  "name": "Opux",
+  "version": "67",
+  "description": "A cool player, Liquid glass bars",
+  "author": "Ngo Minh Quan",
+  "look": {
+    "lyricsMotionStyle": "MOTION"
+  },
+  "glass": {
+    "shader": "glass.agsl",
+    "blur": 7,
+    "margin": 22,
+    "uniforms": {
+      "tintAlpha": 0.3, "bevel": 14, "strength": 16, "spread": 0,
+      "saturation": 1.25, "rimAlpha": 0.35, "sheen": 0.12
+    }
+  },
+  "settings": [
+    { "key": "mode", "label": "Performance", "type": "select", "default": "full",
+      "options": [
+        { "value": "full", "label": "Full", "description": "All animations, liquid glass, blur effects",
+          "look": { "enableProgressiveBlur": "true", "elementBlur": "true" } },
+        { "value": "lite", "label": "Lite (older phones)", "description": "No extra animations, No shader glass",
+          "look": { "bottomBar": "FROSTED", "blurQuality": "LOW", "enableProgressiveBlur": "false", "elementBlur": "false", "lyricsMotionStyle": "PLAIN" } }
+      ] },
+    { "key": "glassStyle", "label": "Glass style (Full only)", "type": "select", "default": "liquid",
+      "options": [
+        { "value": "liquid", "label": "Liquid glass",
+          "glass": { "blur": 7, "uniforms": { "tintAlpha": 0.3, "bevel": 14, "strength": 16, "saturation": 1.25, "rimAlpha": 0.35, "sheen": 0.12 } } },
+        { "value": "clear", "label": "Clear glass",
+          "glass": { "blur": 2.5, "uniforms": { "tintAlpha": 0.1, "bevel": 12, "strength": 10, "saturation": 1.1, "rimAlpha": 0.25, "sheen": 0.06 } } },
+        { "value": "frost", "label": "Mochy's frost", "look": { "bottomBar": "FROSTED" } }
+      ] },
+    { "key": "fringe", "label": "Glass colour fringe", "type": "toggle", "default": "true",
+      "glass": { "uniforms": { "spread": 0.05 } } },
+    { "key": "rounding", "label": "Cover corners (app-wide)", "type": "select", "default": "round",
+      "options": [
+        { "value": "sharp", "label": "Sharp", "look": { "thumbnailCornerRadius": "4" } },
+        { "value": "soft",  "label": "Soft",  "look": { "thumbnailCornerRadius": "18" } },
+        { "value": "round", "label": "Round", "look": { "thumbnailCornerRadius": "30" } }
+      ] },
+    { "key": "pureBlack", "label": "Pure black backgrounds", "type": "toggle", "default": "true",
+      "look": { "pureBlack": "true" } },
+    { "key": "bass", "label": "Bass pulse", "type": "select", "default": "smooth",
+      "options": [
+        { "value": "smooth", "label": "Smooth", "description": "Glow follows the bass level" },
+        { "value": "punchy", "label": "Punchy", "description": "Short kick on every bass hit" },
+        { "value": "off", "label": "Off" }
+      ] },
+    { "key": "progressStyle", "label": "Seek bar style", "type": "select", "default": "line",
+      "options": [
+        { "value": "line", "label": "Line" },
+        { "value": "thick", "label": "Thick" },
+        { "value": "pill", "label": "Pill" }
+      ] },
+    { "key": "lyricsOn", "label": "Word-by-word lyrics", "type": "toggle", "default": "true" }
+  ],
+  "player": {
+    "name": "Opux",
+    "background": [
+      { "type": "blurredCover" },
+      { "type": "ambient", "opacity": 0.6 }
+    ],
+    "dim": 0.3,
+    "padding": 24,
+    "align": "center",
+    "scroll": true,
+    "customise": ["mode", "glassStyle", "fringe", "rounding", "pureBlack", "bass", "progressStyle", "lyricsOn"],
+    "menu": [
+      { "title": "Queue", "action": "queue" }
+    ],
+    "keyframes": {
+      "coverIn": {
+        "0%":   { "opacity": 0, "scale": 0.94, "blur": 14 },
+        "100%": { "opacity": 1, "scale": 1, "blur": 0, "easing": "easeOut" }
+      },
+      "textIn": {
+        "0%":   { "opacity": 0, "blur": 6 },
+        "100%": { "opacity": 1, "blur": 0, "easing": "easeOut" }
+      },
+      "heartbeat": [
+        { "at": 0,    "scale": 1 },
+        { "at": 0.25, "scale": 1.35, "easing": "back" },
+        { "at": 0.5,  "scale": 0.92 },
+        { "at": 0.75, "scale": 1.12 },
+        { "at": 1,    "scale": 1 }
+      ],
+      "bassGlow": {
+        "0%":   { "opacity": 0.25, "scale": 1.04 },
+        "100%": { "opacity": 0.85, "scale": 1.14 }
+      },
+      "kick": {
+        "0%":   { "scale": 1 },
+        "30%":  { "scale": 1.14, "easing": "easeOut" },
+        "100%": { "scale": 1 }
+      },
+      "lift": {
+        "0%":   { "scale": 1 },
+        "40%":  { "scale": 1.14, "easing": "back" },
+        "100%": { "scale": 1 }
+      },
+      "sink": {
+        "0%":   { "scale": 1 },
+        "50%":  { "scale": 0.88 },
+        "100%": { "scale": 1 }
+      }
+    },
+    "blocks": [
+      { "type": "column", "gap": 0, "when": "mode=full", "blocks": [
+
+        { "type": "column", "gap": 0, "when": "!@landscape", "blocks": [
+          { "type": "stack", "align": "center",
+            "states": { "@paused": { "scale": 0.96, "opacity": 0.88 } },
+            "transition": "spring",
+            "animate": { "type": "float", "speed": 0.5, "amount": 0.7 },
+            "blocks": [
+              { "type": "cover", "size": 1, "aspect": "5:6", "corner": 32, "blur": 40, "when": "bass=smooth",
+                "animate": { "keyframes": "bassGlow", "clock": "bass" } },
+              { "type": "cover", "size": 1, "aspect": "5:6", "corner": 32, "blur": 40, "when": "bass=punchy",
+                "opacity": 0.6, "scale": 1.04,
+                "on": { "beat": { "keyframes": "kick", "duration": 200 } } },
+              { "type": "cover", "size": 1, "aspect": "5:6", "corner": 32, "shadow": true, "media": "animated",
+                "enter": { "keyframes": "coverIn", "duration": 650, "on": "song" } }
+            ] },
+
+          { "type": "space", "size": 18 },
+
+          { "type": "row", "gap": 8, "blocks": [
+            { "type": "column", "gap": 2, "blocks": [
+              { "type": "title", "size": 22, "weight": "bold", "lines": 1, "align": "start",
+                "enter": { "keyframes": "textIn", "duration": 500, "delay": 120, "on": "song" } },
+              { "type": "artist", "size": 15, "lines": 1, "align": "start",
+                "enter": { "keyframes": "textIn", "duration": 500, "delay": 220, "on": "song" } }
+            ] },
+            { "type": "button", "action": "like", "size": 40,
+              "enter": { "type": "zoom", "delay": 300, "duration": 450, "on": "song" },
+              "states": { "@liked": { "scale": 1.1 } }, "transition": "spring",
+              "on": { "like": "heartbeat" } },
+            { "type": "button", "action": "menu", "size": 40,
+              "enter": { "type": "zoom", "delay": 360, "duration": 450, "on": "song" } }
+          ] },
+
+          { "type": "space", "size": 14 },
+          { "type": "progress", "style": "line",  "times": true, "when": "progressStyle=line",
+            "enter": { "type": "rise", "delay": 300, "duration": 500, "on": "song" } },
+          { "type": "progress", "style": "thick", "times": true, "when": "progressStyle=thick",
+            "enter": { "type": "rise", "delay": 300, "duration": 500, "on": "song" } },
+          { "type": "progress", "style": "pill",  "times": true, "when": "progressStyle=pill",
+            "enter": { "type": "rise", "delay": 300, "duration": 500, "on": "song" } },
+          { "type": "space", "size": 14 },
+
+          { "type": "box", "glass": 24, "fill": "#22FFFFFF", "corner": 24, "padding": 14, "gap": 10,
+            "enter": { "type": "rise", "delay": 380, "duration": 600, "on": "song" },
+            "states": { "@singing": { "scale": 1.012 } }, "transition": "spring",
+            "blocks": [
+              { "type": "lyrics", "height": 110, "size": 22, "color": "ink", "when": "lyricsOn",
+                "enter": { "keyframes": "textIn", "duration": 600, "delay": 300 } },
+              { "type": "row", "gap": 0, "blocks": [
+                { "type": "button", "action": "shuffle", "size": 40,
+                  "enter": { "type": "zoom", "delay": 440, "duration": 450, "on": "song" },
+                  "states": { "@shuffle": { "scale": 1.18 } }, "transition": "spring" },
+                { "type": "space", "grow": true },
+                { "type": "controls", "size": 52,
+                  "enter": { "type": "zoom", "delay": 480, "duration": 450, "on": "song" },
+                  "on": { "play": { "keyframes": "lift", "duration": 380 }, "pause": { "keyframes": "sink", "duration": 420 } } },
+                { "type": "space", "grow": true },
+                { "type": "button", "action": "repeat", "size": 40,
+                  "enter": { "type": "zoom", "delay": 520, "duration": 450, "on": "song" },
+                  "states": { "@repeat": { "scale": 1.18 } }, "transition": "spring" }
+              ] }
+            ] },
+
+          { "type": "space", "size": 12 }
+        ] },
+
+        { "type": "row", "gap": 28, "when": "@landscape", "blocks": [
+          { "type": "stack", "align": "center",
+            "states": { "@paused": { "scale": 0.96, "opacity": 0.88 } },
+            "transition": "spring",
+            "animate": { "type": "float", "speed": 0.5, "amount": 0.7 },
+            "blocks": [
+              { "type": "cover", "width": 200, "height": 240, "corner": 28, "blur": 40, "when": "bass=smooth",
+                "animate": { "keyframes": "bassGlow", "clock": "bass" } },
+              { "type": "cover", "width": 200, "height": 240, "corner": 28, "blur": 40, "when": "bass=punchy",
+                "opacity": 0.6, "scale": 1.04,
+                "on": { "beat": { "keyframes": "kick", "duration": 200 } } },
+              { "type": "cover", "width": 200, "height": 240, "corner": 28, "shadow": true, "media": "animated",
+                "enter": { "keyframes": "coverIn", "duration": 650, "on": "song" } }
+            ] },
+
+          { "type": "column", "gap": 8, "blocks": [
+            { "type": "title", "size": 22, "weight": "bold", "lines": 1, "align": "start",
+              "enter": { "keyframes": "textIn", "duration": 500, "delay": 120, "on": "song" } },
+            { "type": "artist", "size": 15, "lines": 1, "align": "start",
+              "enter": { "keyframes": "textIn", "duration": 500, "delay": 220, "on": "song" } },
+            { "type": "box", "glass": 24, "fill": "#22FFFFFF", "corner": 20, "padding": 12,
+              "enter": { "type": "rise", "delay": 300, "duration": 550, "on": "song" },
+              "states": { "@singing": { "scale": 1.012 } }, "transition": "spring",
+              "blocks": [
+                { "type": "lyrics", "height": 84, "size": 20, "color": "ink", "when": "lyricsOn" }
+              ] },
+            { "type": "progress", "style": "line",  "times": true, "when": "progressStyle=line",
+              "enter": { "type": "rise", "delay": 380, "duration": 500, "on": "song" } },
+            { "type": "progress", "style": "thick", "times": true, "when": "progressStyle=thick",
+              "enter": { "type": "rise", "delay": 380, "duration": 500, "on": "song" } },
+            { "type": "progress", "style": "pill",  "times": true, "when": "progressStyle=pill",
+              "enter": { "type": "rise", "delay": 380, "duration": 500, "on": "song" } },
+            { "type": "row", "gap": 0, "blocks": [
+              { "type": "button", "action": "like", "size": 40,
+                "enter": { "type": "zoom", "delay": 420, "duration": 450, "on": "song" },
+                "states": { "@liked": { "scale": 1.1 } }, "transition": "spring",
+                "on": { "like": "heartbeat" } },
+              { "type": "space", "grow": true },
+              { "type": "button", "action": "shuffle", "size": 40,
+                "enter": { "type": "zoom", "delay": 460, "duration": 450, "on": "song" },
+                "states": { "@shuffle": { "scale": 1.18 } }, "transition": "spring" },
+              { "type": "controls", "size": 52,
+                "enter": { "type": "zoom", "delay": 500, "duration": 450, "on": "song" },
+                "on": { "play": { "keyframes": "lift", "duration": 380 }, "pause": { "keyframes": "sink", "duration": 420 } } },
+              { "type": "button", "action": "repeat", "size": 40,
+                "enter": { "type": "zoom", "delay": 540, "duration": 450, "on": "song" },
+                "states": { "@repeat": { "scale": 1.18 } }, "transition": "spring" },
+              { "type": "space", "grow": true },
+              { "type": "button", "action": "menu", "size": 40,
+                "enter": { "type": "zoom", "delay": 580, "duration": 450, "on": "song" } }
+            ] }
+          ] }
+        ] }
+      ] },
+
+      { "type": "column", "gap": 0, "when": "mode=lite", "blocks": [
+
+        { "type": "column", "gap": 0, "when": "!@landscape", "blocks": [
+          { "type": "stack", "align": "center",
+            "states": { "@paused": { "scale": 0.96, "opacity": 0.88 } },
+            "transition": "spring",
+            "blocks": [
+              { "type": "cover", "size": 1, "aspect": "5:6", "corner": 32, "blur": 40, "when": "bass=smooth",
+                "animate": { "keyframes": "bassGlow", "clock": "bass" } },
+              { "type": "cover", "size": 1, "aspect": "5:6", "corner": 32, "blur": 40, "when": "bass=punchy",
+                "opacity": 0.6, "scale": 1.04,
+                "on": { "beat": { "keyframes": "kick", "duration": 200 } } },
+              { "type": "cover", "size": 1, "aspect": "5:6", "corner": 32, "shadow": true, "media": "animated",
+                "enter": { "keyframes": "coverIn", "duration": 650, "on": "song" } }
+            ] },
+
+          { "type": "space", "size": 18 },
+
+          { "type": "row", "gap": 8, "blocks": [
+            { "type": "column", "gap": 2, "blocks": [
+              { "type": "title", "size": 22, "weight": "bold", "lines": 1, "align": "start",
+                "enter": { "keyframes": "textIn", "duration": 500, "delay": 120, "on": "song" } },
+              { "type": "artist", "size": 15, "lines": 1, "align": "start",
+                "enter": { "keyframes": "textIn", "duration": 500, "delay": 220, "on": "song" } }
+            ] },
+            { "type": "button", "action": "like", "size": 40, "on": { "like": "heartbeat" } },
+            { "type": "button", "action": "menu", "size": 40 }
+          ] },
+
+          { "type": "space", "size": 14 },
+          { "type": "progress", "style": "line",  "times": true, "when": "progressStyle=line" },
+          { "type": "progress", "style": "thick", "times": true, "when": "progressStyle=thick" },
+          { "type": "progress", "style": "pill",  "times": true, "when": "progressStyle=pill" },
+          { "type": "space", "size": 14 },
+
+          { "type": "box", "glass": 24, "fill": "#22FFFFFF", "corner": 24, "padding": 14, "gap": 10,
+            "blocks": [
+              { "type": "lyrics", "height": 110, "size": 22, "color": "ink", "when": "lyricsOn",
+                "enter": { "keyframes": "textIn", "duration": 600, "delay": 300 } },
+              { "type": "row", "gap": 0, "blocks": [
+                { "type": "button", "action": "shuffle", "size": 40 },
+                { "type": "space", "grow": true },
+                { "type": "controls", "size": 52 },
+                { "type": "space", "grow": true },
+                { "type": "button", "action": "repeat", "size": 40 }
+              ] }
+            ] },
+
+          { "type": "space", "size": 12 }
+        ] },
+
+        { "type": "row", "gap": 28, "when": "@landscape", "blocks": [
+          { "type": "stack", "align": "center",
+            "states": { "@paused": { "scale": 0.96, "opacity": 0.88 } },
+            "transition": "spring",
+            "blocks": [
+              { "type": "cover", "width": 200, "height": 240, "corner": 28, "blur": 40, "when": "bass=smooth",
+                "animate": { "keyframes": "bassGlow", "clock": "bass" } },
+              { "type": "cover", "width": 200, "height": 240, "corner": 28, "blur": 40, "when": "bass=punchy",
+                "opacity": 0.6, "scale": 1.04,
+                "on": { "beat": { "keyframes": "kick", "duration": 200 } } },
+              { "type": "cover", "width": 200, "height": 240, "corner": 28, "shadow": true, "media": "animated",
+                "enter": { "keyframes": "coverIn", "duration": 650, "on": "song" } }
+            ] },
+
+          { "type": "column", "gap": 8, "blocks": [
+            { "type": "title", "size": 22, "weight": "bold", "lines": 1, "align": "start",
+              "enter": { "keyframes": "textIn", "duration": 500, "delay": 120, "on": "song" } },
+            { "type": "artist", "size": 15, "lines": 1, "align": "start",
+              "enter": { "keyframes": "textIn", "duration": 500, "delay": 220, "on": "song" } },
+            { "type": "box", "glass": 24, "fill": "#22FFFFFF", "corner": 20, "padding": 12,
+              "blocks": [
+                { "type": "lyrics", "height": 84, "size": 20, "color": "ink", "when": "lyricsOn" }
+              ] },
+            { "type": "progress", "style": "line",  "times": true, "when": "progressStyle=line" },
+            { "type": "progress", "style": "thick", "times": true, "when": "progressStyle=thick" },
+            { "type": "progress", "style": "pill",  "times": true, "when": "progressStyle=pill" },
+            { "type": "row", "gap": 0, "blocks": [
+              { "type": "button", "action": "like", "size": 40, "on": { "like": "heartbeat" } },
+              { "type": "space", "grow": true },
+              { "type": "button", "action": "shuffle", "size": 40 },
+              { "type": "controls", "size": 52 },
+              { "type": "button", "action": "repeat", "size": 40 },
+              { "type": "space", "grow": true },
+              { "type": "button", "action": "menu", "size": 40 }
+            ] }
+          ] }
+        ] }
+      ] }
+    ]
+  },
+  "bar": {
+    "tabs": ["home", "search", "library", "settings"],
+    "labels": "selected",
+    "indicator": { "type": "glow", "color": "accent" },
+    "glass": true,
+    "drag": true,
+    "keyframes": {
+      "squish": { "50%": { "scaleX": 1.2, "scaleY": 0.8 } },
+      "hop": { "40%": { "y": -6 } }
+    },
+    "press": { "keyframes": "squish", "duration": 260 },
+    "select": { "keyframes": "hop", "duration": 420, "easing": "back" }
+  },
+  "mini": {
+    "padding": 4,
+    "blocks": [
+      { "type": "column", "gap": 2, "when": "mode=full", "blocks": [
+        { "type": "title", "size": 14, "weight": "semibold", "lines": 1, "align": "start",
+          "enter": { "keyframes": "textIn", "duration": 400, "on": "song" } },
+        { "type": "artist", "size": 12, "lines": 1, "align": "start",
+          "enter": { "keyframes": "textIn", "duration": 400, "delay": 100, "on": "song" } }
+      ] },
+      { "type": "column", "gap": 2, "when": "mode=lite", "blocks": [
+        { "type": "title", "size": 14, "weight": "semibold", "lines": 1, "align": "start" },
+        { "type": "artist", "size": 12, "lines": 1, "align": "start" }
+      ] },
+      { "type": "button", "action": "like", "size": 36, "when": "mode=full",
+        "states": { "@liked": { "scale": 1.12 } }, "transition": "spring",
+        "on": { "like": "heartbeat" } },
+      { "type": "button", "action": "like", "size": 36, "when": "mode=lite" },
+      { "type": "button", "action": "playPause", "size": 36, "when": "mode=full",
+        "on": { "play": { "keyframes": "lift", "duration": 380 }, "pause": { "keyframes": "sink", "duration": 420 } } },
+      { "type": "button", "action": "playPause", "size": 36, "when": "mode=lite" },
+      { "type": "button", "action": "next", "size": 36 }
+    ]
+  }
+}

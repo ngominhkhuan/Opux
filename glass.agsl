@@ -1,0 +1,72 @@
+uniform shader content;
+uniform float2 size;
+uniform float margin;
+uniform float radius;
+uniform float density;
+uniform float quality;
+layout(color) uniform half4 chrome;
+uniform float tintAlpha;
+uniform float bevel;
+uniform float strength;
+uniform float spread;
+uniform float saturation;
+uniform float rimAlpha;
+uniform float sheen;
+
+float sdBox(float2 p, float2 hs, float r) {
+    float2 q = abs(p) - hs + float2(r);
+    return length(max(q, float2(0.0))) + min(max(q.x, q.y), 0.0) - r;
+}
+
+half4 main(float2 p) {
+    float2 c = size * 0.5;
+    float2 hs = size * 0.5 - float2(margin);
+    float r = min(radius, min(hs.x, hs.y));
+    float2 q = p - c;
+    float d = sdBox(q, hs, r);
+    float4 base = float4(content.eval(p));
+    if (d > 1.0) {
+        return half4(base);
+    }
+
+    // lens: bends most near the rim, flat in the middle
+    float bev = max(bevel * density, 1.0);
+    float t = clamp(1.0 + d / bev, 0.0, 1.0);
+    float bend = 1.0 - sqrt(max(1.0 - t * t, 0.0));
+
+    // outward surface normal from the distance field
+    float e = 1.0;
+    float2 n = float2(
+        sdBox(q + float2(e, 0.0), hs, r) - sdBox(q - float2(e, 0.0), hs, r),
+        sdBox(q + float2(0.0, e), hs, r) - sdBox(q - float2(0.0, e), hs, r));
+    float nl = length(n);
+    n = nl > 0.0001 ? n / nl : float2(0.0);
+
+    float2 off = n * bend * strength * density;
+    float3 col;
+    if (quality > 0.5 && spread > 0.0) {
+        // colour fringe, skipped on low blur quality
+        col = float3(
+            content.eval(p - off * (1.0 + spread)).r,
+            content.eval(p - off).g,
+            content.eval(p - off * (1.0 - spread)).b);
+    } else {
+        col = float3(content.eval(p - off).rgb);
+    }
+
+    float l = dot(col, float3(0.299, 0.587, 0.114));
+    col = mix(float3(l), col, saturation);
+    col = mix(col, float3(chrome.rgb), tintAlpha);
+
+    // lit rim, brightest facing the top left
+    float rim = smoothstep(-bev, 0.0, d);
+    float lit = clamp(dot(n, normalize(float2(-0.7, -0.7))) * 0.5 + 0.5, 0.0, 1.0);
+    col += float3(rim * rimAlpha * (0.3 + 0.7 * lit));
+
+    // soft sheen from the top
+    float top = clamp(1.0 - (q.y + hs.y) / (2.0 * hs.y), 0.0, 1.0);
+    col += float3(sheen * top * top);
+
+    float a = 1.0 - smoothstep(-1.0, 1.0, d);
+    return half4(float4(mix(base.rgb, clamp(col, 0.0, 1.0), a), 1.0));
+}
